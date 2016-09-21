@@ -1,3 +1,6 @@
+'use strict';
+
+
  var { Router,
           Route,
           IndexRoute,
@@ -24,56 +27,29 @@
         );    
       }
     }); 
-    var SomeActions = Reflux.createActions([
-      'updateChat',
-      'deleteChat'
-    ]);
 
-    var Store = Reflux.createStore({
-      listenables : [SomeActions],
-      init(){
-        this.chat = '';
-        this.data = '';
-      },
-      getInitialState(){
-        return {chatMessage : this.chat}
-      },
-      onUpdateChat: function(newChat){
-        this.chat = newChat;
-        this.trigger({
-          chat : this.chat
-        });
-      },
-      onDeleteChat: function(){
-        
-      }
-    });
+    var Chat = React.createClass({ 
 
-    var Chat = React.createClass({
     mixins: [
         Reflux.listenTo(SomeActions.updateChat)
         ], 
     componentDidMount () {
       SomeActions.updateChat(this.props.chat);
     },
-    mixins: [Reflux.connect(Store,'chatMessage','deleteMsg')],
+    mixins: [Reflux.connect(Store,'chatMessage')],
     addValueInMessageBox: function(){
       var list = document.getElementById("chatBox");
     },
 
-    clickChat: function(e){
-      e.preventDefault();
-      var list = document.getElementById("wrapper");
-      $(list).animate({ scrollTop: $('#wrapper').height() }, 100);      
-      $(list).append(this.state.chatMessage.chat + "<br>")
-      $('#usermsg').val("")
-      this.state.chatMessage.chat = '';
-    },
-
-
     changeMessage: function(e){
-      e.preventDefault();      
-      SomeActions.updateChat(e.target.value);
+      e.preventDefault();  
+      var list = document.getElementById("hello"); 
+      this.setState({data : this.state.Input})   
+      $('<div class="bubble-human"/>').html(this.state.Input).appendTo(list);     
+      //rows.push(this.state.Input);
+      SomeActions.updateChat(this.state.Input);
+
+
     },
 
     deleteMsg: function(e){
@@ -81,19 +57,71 @@
         var list = document.getElementById("wrapper");
         $(list).remove();
     },
+    
+    /*
+    conductConversationOnKeyUp: function(e){
+      if(e.keyCode === 13) {
+         var text = this.state.value;
+         SomeActions.conductConversation(text);
+       }
+    },*/
+
+    conductConversation: function(){  
+      var text = this.state.value;
+      SomeActions.conductConversation(text);
+    },
+
+    handleChange : function(e){
+      this.setState({Input: e.target.value});
+    },
+
     render: function() {
+      var rows = [];
       $('#valueOFList').removeClass('show').addClass('hide');
       return (
           <div id="wrapper">
             <form name="message">
-                <input name="usermsg" type="text" id="usermsg" size="63" value={this.state.value} onChange={this.changeMessage}  />
-                <input name="submitmsg" type="submit"  id="submitmsg" onClick={this.clickChat} value="Send" />
-                <button type="button" onClick={this.deleteMsg} >DeleteAll</button>
+              <div className="container">
+                <div className="col-lg-6 col-md-6 col-xs-12 padding-top-chat">
+                  <div className="conversation-flow-container clearfix ">
+                      <div className="col-lg-12 col-md-12 col-xs-12">
+                        <div id="hello" className="conversation-well conversation-container clearfix chat-height">
+                         
+                        </div>
+                        <div id="chatData">
+                        </div>
+                      </div>
+                      <div className="col-lg-10 col-md-10 col-xs-8 no-padding-right">
+                          <input 
+                            id="input-box"
+                            type="text" 
+                            placeholder="Type a response" 
+                            className="user-input form-control" 
+                            value={this.state.value}
+                            onChange={this.handleChange}
+                            onKeyUp={this.conductConversationOnKeyUp}
+                           />
+                      </div>
+                      <div className="col-lg-2 col-md-2 col-xs-4 text-right no-padding-left">
+                        <button id="send-btn" className="input-btn btn btn-block" onClick={this.changeMessage}>Send</button>
+                      </div>
+                  </div>
+                </div>
+                <div className="col-lg-6 col-md-6 col-xs-12">
+                  <div className="col-lg-12 col-md-12 col-xs-12">
+                      <div className="information-container"></div>
+                  </div>
+                  <div className="col-lg-12 col-md-12 col-xs-12">
+                      <div className="profile-container"></div>
+                  </div>
+                </div>
+            </div>
             </form>
           </div>
           );
         }
     });
+
 
     var App = React.createClass({
     render: function() {
@@ -111,6 +139,19 @@
     )
   }
 });
+
+
+/*var dataChar = React.createClass({
+  render : function(){
+  var rows = [];
+  rows.push(this.state.data);
+    return(
+      <div class="bubble-human">
+        {rows}
+      </div>
+    )
+  }
+});*/
     
     ReactDOM.render(
     <Router>
